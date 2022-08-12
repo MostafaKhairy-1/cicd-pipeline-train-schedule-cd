@@ -21,7 +21,7 @@ pipeline {
                         failOnError: false,
                     publisher:[
                         configName: "Staging",
-                        sshCredentials:
+                        sshCredentials:[
                             username: "$userName",
                             encryptedPassphrase: "$userPassword"
 
@@ -55,12 +55,12 @@ stage("Production") {
                         failOnError: false,
                     publisher:[
                         configName: "Production",
-                        sshCredentials:
+                        sshCredentials: [
                             username: "$userName",
                             encryptedPassphrase: "$userPassword"
 
                     ],
-                    transfer: [
+                    transfer: [     
                         sourceFiles: "dist/trainSchedule.zip",
                         removePrefix: "dist/",
                         remoteDirectory: "/tmp",
