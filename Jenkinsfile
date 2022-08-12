@@ -1,80 +1,46 @@
 pipeline {
     agent any
-    stages {
-        stage('Build') {
-            steps {
-                echo 'Running build automation'
-                sh './gradlew build --no-daemon'
-                archiveArtifacts artifacts: 'dist/trainSchedule.zip'
+
+    stages{
+        stage('build'){
+            steps{
+                echo "build stage"
+                sh "./gradlew build"
+                archiveArtifacts artifacts: 'dist/trainShedule.zip'
+
             }
         }
-    }
-    stage("staging") {
 
+        stage ('staging'){
             when{
-                branch  "master"
+                branch 'master'
             }
-            steps {
-                withCredentials([usernamePassword(credentialsID: 'webserver_login',usernameVariable: 'userName', passwordVariable: 'userPassword' )])
-                sshPublisher (
-                     continueOnError: true,
-                        failOnError: false,
-                    publisher:[
-                        configName: "Staging",
-                        sshCredentials:[
-                            username: "$userName",
-                            encryptedPassphrase: "$userPassword"
+            steps{
+                withCredentials([usernamePassword(credentialsId: 'web_login', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')])
+                sshPublisher(
+                    continueOnError: false,
+                    failOnError: true,
+                    publishers:[
+                       configName: "staging",
+                       sshCredentials: [
+                           username: '$USERNAME',
+                           encryptedPassphrase: '$USERPASS'
+                       ],
 
-                    ],
-                    transfer : [
-                        sourceFiles: "dist/trainSchedule.zip",
-                        removePrefix: "dist/",
-                        remoteDirectory: "/tmp",
-                         execCommand: 'sudo /usr/bin/systemctl stop train-schedule && rm -rf /opt/train-schedule/* && unzip /tmp/trainSchedule.zip -d /opt/train-schedule && sudo /usr/bin/systemctl start train-schedule'
-
+                       transfers:[
+                           sourceFiles: 'dist/trainSchedule.zip',
+                           removePrefix: 'dist',
+                           remoteDirectory: '/tmp',
+                           execCommand: 'sudo /usr/bin/systemctl stop train-schedule && rm -rf /opt/train-schedule/* && unzip /tmp/trainSchedule.zip -d /opt/train-schedule && sudo /usr/bin/systemctl start train-schedule'
+                       ]
                     ]
+                ) 
 
-                )
-                
-                
-            }
 
+            
         }
     }
-    }
-}
-stage("Production") {
 
-            when{
-                branch  "master"
-            }
-            steps {
-                withCredentials([usernamePassword(credentialsID: 'webserver_login',usernameVariable: 'userName', passwordVariable: 'userPassword' )])
-                sshPublisher (
-                     continueOnError: true,
-                        failOnError: false,
-                    publisher:[
-                        configName: "Production",
-                        sshCredentials: [
-                            username: "$userName",
-                            encryptedPassphrase: "$userPassword"
+ }
 
-                    ],
-                    transfer: [     
-                        sourceFiles: "dist/trainSchedule.zip",
-                        removePrefix: "dist/",
-                        remoteDirectory: "/tmp",
-                         execCommand: 'sudo /usr/bin/systemctl stop train-schedule && rm -rf /opt/train-schedule/* && unzip /tmp/trainSchedule.zip -d /opt/train-schedule && sudo /usr/bin/systemctl start train-schedule'
-
-                    ]
-
-                )
-                
-                
-            }
-
-        }
-    }
-    }
-}
 }
