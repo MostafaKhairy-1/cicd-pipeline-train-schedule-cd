@@ -18,12 +18,12 @@ pipeline {
                 withCredentials([usernamePassword(credentialsID: 'webserver_login',usernameVariable: 'userName', passwordVariable: 'userPassword' )])
                 sshPublisher (
                      continueOnError: true,
-                        failOnError: true,
+                        failOnError: false,
                     publisher:[
                         configName: "Staging",
                         sshCredentials:
                             username: "$userName",
-                            encryptedPassphrase: "$userPassword",
+                            encryptedPassphrase: "$userPassword"
 
                     ],
                     transfer : [
@@ -52,12 +52,12 @@ stage("Production") {
                 withCredentials([usernamePassword(credentialsID: 'webserver_login',usernameVariable: 'userName', passwordVariable: 'userPassword' )])
                 sshPublisher (
                      continueOnError: true,
-                        failOnError: true,
+                        failOnError: false,
                     publisher:[
                         configName: "Production",
                         sshCredentials:
                             username: "$userName",
-                            encryptedPassphrase: "$userPassword",
+                            encryptedPassphrase: "$userPassword"
 
                     ],
                     transfer: [
